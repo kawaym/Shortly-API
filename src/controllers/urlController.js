@@ -13,7 +13,7 @@ export async function createUrl(req, res) {
   try {
     const urlAlreadyExists = await connection.query(
       `
-        SELECT * FROM urls u WHERE u."userId"=$1 AND u."completeUrl"=$2
+        SELECT * FROM urls u WHERE u."userId"=$1 AND u.url=$2
       `,
       [user.id, urlToShorten]
     );
@@ -25,12 +25,36 @@ export async function createUrl(req, res) {
     connection.query(
       `
       INSERT INTO
-        urls("completeUrl", "shortenedUrl", "userId")
+        urls(url, "shortUrl", "userId")
       VALUES($1, $2, $3)
     `,
       [urlToShorten, shortenedUrl, user.id]
     );
     res.status(201).send({ shortUrl: shortenedUrl });
+  } catch (error) {
+    console.log(error);
+    return res.sendStatus(500);
+  }
+}
+export async function readUrl(req, res) {
+  const url = req.params.shortUrl;
+  try {
+    const urls = (
+      await connection.query(
+        `
+      SELECT u.id, u.url, u."shortUrl"
+      FROM urls u
+      WHERE u."shortUrl"=$1 
+    `,
+        [url]
+      )
+    ).rows;
+    if (urls.length === 0) {
+      res.sendStatus(404);
+      return;
+    } else {
+      res.status(200).send(urls[0]);
+    }
   } catch (error) {
     console.log(error);
     return res.sendStatus(500);

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createUrl } from "../controllers/urlController.js";
+import { createUrl, readUrl } from "../controllers/urlController.js";
 import { validateSchemaMiddleware } from "../middlewares/validateSchemaMiddleware.js";
 import { validateTokenMiddleware } from "../middlewares/validateTokenMiddleware.js";
 import urlSchema from "../schemas/urlSchema.js";
@@ -11,5 +11,6 @@ urlRouter.post(
   validateSchemaMiddleware(urlSchema),
   createUrl
 );
+urlRouter.get("/urls/:shortUrl", readUrl);
 
 export default urlRouter;
